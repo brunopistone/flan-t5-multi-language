@@ -9,6 +9,7 @@ Parameters:
   EndpointInstanceCount:
     Type: Number
     Description: Number of instances to launch for the endpoint
+    Default: 1
     MinValue: 1
   EndpointInstanceType:
     Type: String

@@ -50,7 +50,7 @@ def extend_config(args, stage_config, container_def):
     # Create new params and tags
     new_params = {
         "ContainerImage": container_def["Image"],
-        "EndpointInstanceCount": args.inference_instance_count,
+        "EndpointInstanceCount": str(args.inference_instance_count),
         "EndpointInstanceType": args.inference_instance_type,
         "EndpointName": args.endpoint_name,
         "LambdaPath": s3_artifacts_path + "/lambda.zip",
