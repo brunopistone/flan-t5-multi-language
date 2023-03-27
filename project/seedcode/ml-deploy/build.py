@@ -1,6 +1,5 @@
 import argparse
 import boto3
-from botocore.exceptions import ClientError
 from distutils.dir_util import copy_tree
 from huggingface_hub import snapshot_download
 import json
@@ -8,11 +7,9 @@ import logging
 import os
 from pathlib import Path
 import sagemaker.session
-from sagemaker.huggingface.model import HuggingFaceModel, HuggingFacePredictor
+from sagemaker.huggingface.model import HuggingFaceModel
 import tarfile
 from tempfile import TemporaryDirectory
-import time
-import traceback
 from zipfile import ZipFile
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -78,7 +75,6 @@ def extend_config(args, stage_config, container_def):
         "Tags": {**stage_config.get("Tags", {}), **new_tags},
     }
 
-
 def get_pipeline_custom_tags(args, sagemaker_client, new_tags):
     try:
         response = sagemaker_client.list_tags(
@@ -89,7 +85,6 @@ def get_pipeline_custom_tags(args, sagemaker_client, new_tags):
     except:
         logger.error("Error getting project tags")
     return new_tags
-
 
 def get_cfn_style_config(stage_config):
     parameters = []
@@ -108,7 +103,6 @@ def get_cfn_style_config(stage_config):
         tags.append(tag)
     return parameters, tags
 
-
 def create_cfn_params_tags_file(config, export_params_file, export_tags_file):
     # Write Params and tags in separate file for Cfn cli command
     parameters, tags = get_cfn_style_config(config)
@@ -116,7 +110,6 @@ def create_cfn_params_tags_file(config, export_params_file, export_tags_file):
         json.dump(parameters, f, indent=4)
     with open(export_tags_file, "w") as f:
         json.dump(tags, f, indent=4)
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -181,8 +174,6 @@ def main():
 
     container_def = model.prepare_container_def(instance_type=args.inference_instance_type)
 
-    # deploy_model(args, model, model_url)
-
     with ZipFile(os.path.join(BASE_DIR, "lambda.zip"), 'w') as zip_object:
         # Adding files that need to be zipped
         zip_object.write(os.path.join(BASE_DIR, "lambda", "handler.py"))
@@ -202,7 +193,6 @@ def main():
         json.dump(staging_config, f, indent=4)
     if (args.export_cfn_params_tags):
         create_cfn_params_tags_file(staging_config, args.export_staging_params, args.export_staging_tags)
-
 
 if __name__ == "__main__":
     main()

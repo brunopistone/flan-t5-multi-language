@@ -216,6 +216,17 @@ Resources:
               Service:
                 - servicecatalog.amazonaws.com
             Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Join ['-', ['SMCustomProject-SAMPLE-Service-Catalog-Policy', !Select [4, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                - 'iam:PassRole'
+                Resource:
+                  - arn:aws:iam::*:role/service-role/AmazonSageMakerServiceCatalogProductsUse*
+                  - arn:aws:iam::*:role/AmazonSageMakerServiceCatalogProductsUse*
+                Effect: Allow
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
         - arn:aws:iam::aws:policy/AmazonSageMakerAdmin-ServiceCatalogProductsServiceRolePolicy
@@ -231,16 +242,16 @@ Resources:
           - Effect: Allow
             Principal:
               Service:
-                  - lambda.amazonaws.com",
-                  - events.amazonaws.com",
-                  - apigateway.amazonaws.com",
-                  - cloudformation.amazonaws.com",
-                  - states.amazonaws.com",
-                  - codepipeline.amazonaws.com",
-                  - codebuild.amazonaws.com",
-                  - glue.amazonaws.com",
-                  - firehose.amazonaws.com",
-                  - sagemaker.amazonaws.com"
+                - lambda.amazonaws.com
+                - events.amazonaws.com
+                - apigateway.amazonaws.com
+                - cloudformation.amazonaws.com
+                - states.amazonaws.com
+                - codepipeline.amazonaws.com
+                - codebuild.amazonaws.com
+                - glue.amazonaws.com
+                - firehose.amazonaws.com
+                - sagemaker.amazonaws.com
             Action: 'sts:AssumeRole'
       Policies:
         - PolicyName: 'AmazonSageMakerServiceCatalogProductsUsePolicyFlanT5'
@@ -355,8 +366,8 @@ Resources:
               - Action:
                   - 'iam:PassRole'
                 Resource:
-                  - >-
-                    arn:aws:iam::*:role/service-role/AmazonSageMakerServiceCatalogProductsUse*
+                  - arn:aws:iam::*:role/service-role/AmazonSageMakerServiceCatalogProductsUse*
+                  - arn:aws:iam::*:role/AmazonSageMakerServiceCatalogProductsUse*
                 Effect: Allow
               - Effect: Allow
                 Action:
