@@ -17,6 +17,10 @@ Parameters:
   EndpointName:
     Type: String
     Description: SageMaker Endpoint Name used by the lambda function
+  LambdaName:
+    Type: String
+    Description: Lambda Function Name
+    Default: Multi-Language-GenAI
   LambdaPath:
     Type: String
     Description: S3 path for lambda artifact
@@ -71,16 +75,16 @@ Resources:
           ModelName: !GetAtt Model.ModelName
           VariantName: AllTraffic
 
-    Endpoint:
-      Type: AWS::SageMaker::Endpoint
-      Properties:
-        EndpointName: !Ref EndpointName
-        EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
+  Endpoint:
+    Type: AWS::SageMaker::Endpoint
+    Properties:
+      EndpointName: !Ref EndpointName
+      EndpointConfigName: !GetAtt EndpointConfig.EndpointConfigName
 
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: Multi-Language-GenAI
+      FunctionName: !Ref LambdaName
       Timeout: 900
       PackageType: Zip
       Code:

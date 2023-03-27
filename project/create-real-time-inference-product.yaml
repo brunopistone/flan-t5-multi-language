@@ -371,7 +371,9 @@ Resources:
                 Effect: Allow
               - Effect: Allow
                 Action:
+                  - 'comprehend:*'
                   - 'lambda:*'
+                  - 'translate:*'
                 Resource:
                   - '*'
               - Action:

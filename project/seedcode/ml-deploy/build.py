@@ -53,6 +53,7 @@ def extend_config(args, stage_config, container_def):
         "EndpointInstanceCount": str(args.inference_instance_count),
         "EndpointInstanceType": args.inference_instance_type,
         "EndpointName": args.endpoint_name,
+        "LambdaName": args.lambda_name,
         "LambdaPath": s3_artifacts_path + "/lambda.zip",
         "ModelDataUrl": container_def["ModelDataUrl"],
         "ModelName": args.model_name,
@@ -123,6 +124,7 @@ def main():
     parser.add_argument("--inference-instance-type", type=str, default="ml.g5.xlarge")
     parser.add_argument("--inference-instance-count", type=str, default=1)
     parser.add_argument("--inference-python-version", type=str, default="py38")
+    parser.add_argument("--lambda-name", type=str, default="Multi-Language-GenAI")
     parser.add_argument("--model-execution-role", type=str, required=True)
     parser.add_argument("--model-name", type=str, default="flan-t5-xxl")
     parser.add_argument("--sagemaker-project-id", type=str, required=True)
@@ -156,7 +158,8 @@ def main():
     compress(str(model_dir))
 
     model_url = sagemaker.Session().upload_data(
-        os.path.join(BASE_DIR, "model.tar.gz"), bucket=args.default_bucket,
+        os.path.join(BASE_DIR, "model.tar.gz"),
+        bucket=args.default_bucket,
         key_prefix="/".join([s3_model_path, args.model_name])
     )
 
@@ -174,12 +177,13 @@ def main():
 
     container_def = model.prepare_container_def(instance_type=args.inference_instance_type)
 
-    with ZipFile(os.path.join(BASE_DIR, "lambda.zip"), 'w') as zip_object:
+    with ZipFile("./lambda.zip", 'w') as zip_object:
         # Adding files that need to be zipped
-        zip_object.write(os.path.join(BASE_DIR, "lambda", "handler.py"))
+        zip_object.write('./lambda/handler.py')
 
     lambda_url = sagemaker.Session().upload_data(
-        os.path.join(BASE_DIR, "lambda.zip"), bucket=args.default_bucket,
+        "./lambda.zip",
+        bucket=args.default_bucket,
         key_prefix=s3_artifacts_path
     )
 
