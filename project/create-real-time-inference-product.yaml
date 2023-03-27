@@ -41,12 +41,12 @@ Parameters:
 
   ProductSupportURLParameter:
     Type: String
-    Default: 'https://github.com/brunopistone/multi-model-train-template'
+    Default: 'https://github.com/brunopistone/flan-t5-multi-language'
     Description: The support url of this product within the portfolio.
 
   SageMakerProjectRepoZipParameter:
     Type: String
-    Default: 'https://github.com/bpistone/flan-t5-multi-language/archive/refs/heads/main.zip'
+    Default: 'https://github.com/brunopistone/flan-t5-multi-language/archive/refs/heads/main.zip'
     Description: 'URL for a Zip of the SageMaker Projects Examples GitHub Repo'
 
   SageMakerProjectRepoNameBranchParameter:
