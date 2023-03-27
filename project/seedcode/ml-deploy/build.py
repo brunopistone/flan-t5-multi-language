@@ -177,12 +177,12 @@ def main():
 
     container_def = model.prepare_container_def(instance_type=args.inference_instance_type)
 
-    with ZipFile("./lambda.zip", 'w') as zip_object:
+    with ZipFile(os.path.join(BASE_DIR, "lambda.zip"), 'w') as zip_object:
         # Adding files that need to be zipped
-        zip_object.write('./lambda/handler.py')
+        zip_object.write(os.path.join(BASE_DIR, "lambda", "handler.py"), "lambda/handler.py")
 
     lambda_url = sagemaker.Session().upload_data(
-        "./lambda.zip",
+        os.path.join(BASE_DIR, "lambda.zip"),
         bucket=args.default_bucket,
         key_prefix=s3_artifacts_path
     )
