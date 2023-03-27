@@ -10,6 +10,7 @@ import sagemaker.session
 from sagemaker.huggingface.model import HuggingFaceModel
 import tarfile
 from tempfile import TemporaryDirectory
+import time
 from zipfile import ZipFile
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -56,7 +57,7 @@ def extend_config(args, stage_config, container_def):
         "LambdaName": args.lambda_name,
         "LambdaPath": s3_artifacts_path + "/lambda.zip",
         "ModelDataUrl": container_def["ModelDataUrl"],
-        "ModelName": args.model_name,
+        "ModelName": args.model_name + "-" + + str(round(time.time())),
         "ModelExecutionRoleArn": args.model_execution_role,
         "S3BucketArtifacts": args.default_bucket,
         "SageMakerProjectName": args.sagemaker_project_name,
