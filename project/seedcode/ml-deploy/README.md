@@ -1,4 +1,4 @@
-# SageMaker Projects: MLOps template for Batch Inference with Batch Transform and SageMaker Pipelines
+# SageMaker Projects: MLOps template for Flan T5 XXL Endpoint
 
 Guide to use this template:
 
@@ -7,3 +7,9 @@ Guide to use this template:
 3. Change the `*-config.json` files to the input path and output path that you want to use for batch inference
 4. Push the changes to CodeCommit from the SageMaker Studio IDE / your IDE of choice
 5. Go to CodePipeline and check the pipeline related to the project.
+
+## Run test frontend
+
+Execute the following command in the terminal:
+
+`streamlit run flan-t5-playground.py --server.port 6006`

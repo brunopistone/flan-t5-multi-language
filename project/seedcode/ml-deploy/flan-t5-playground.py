@@ -13,7 +13,7 @@ st.sidebar.title("Flan-T5 Parameters")
 
 stop_word = st.sidebar.text_input("Stop word")
 length_penalty = st.sidebar.slider("Length Penalty", min_value=0.0, max_value=10.0, value=2.0)
-min_length, max_length = st.sidebar.slider("Min/Max length", 0, 200, (30, 100))
+min_length, max_length = st.sidebar.slider("Min/Max length", 0, 2000, (30, 500))
 temperature = st.sidebar.slider("Temperature", min_value=0.0, max_value=1.0, value=0.3)
 rep_penalty = st.sidebar.slider("Repetition Penalty", min_value=0.9, max_value=1.2, value=1.0)
 

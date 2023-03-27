@@ -4,8 +4,11 @@ import logging
 import os
 import traceback
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+if len(logging.getLogger().handlers) > 0:
+    logging.getLogger().setLevel(logging.INFO)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 comprehend_client = boto3.client("comprehend")
 sagemaker_runtime_client = boto3.client('sagemaker-runtime')
@@ -49,6 +52,8 @@ def lambda_handler(event, context):
         payload = event["payload"]
         parameters = event["parameters"]
 
+        payload = payload.replace("\n", "")
+
         start_lan = detect_language(payload)
 
         if start_lan != "en":
@@ -63,7 +68,7 @@ def lambda_handler(event, context):
             ContentType='application/json',
             Body=json.dumps({
                 "inputs": payload,
-                "parameters" :parameters
+                "parameters": parameters
             }))
 
         results = json.loads(response['Body'].read().decode())
