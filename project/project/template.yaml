@@ -68,7 +68,7 @@ Resources:
               - !Ref 'AWS::Partition'
               - 'iam:'
               - !Ref 'AWS::AccountId'
-              - role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
+              - role/AmazonSageMakerServiceCatalogProductsUseRoleFlanT5
           Id: !Sub 'codecommit-${SageMakerProjectName}-trigger'
   
   ModelDeployBuildProject:
@@ -84,7 +84,7 @@ Resources:
           - !Ref 'AWS::Partition'
           - 'iam:'
           - !Ref 'AWS::AccountId'
-          - role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
+          - role/AmazonSageMakerServiceCatalogProductsUseRoleFlanT5
       Artifacts:
         Type: CODEPIPELINE
       Environment:
@@ -105,7 +105,7 @@ Resources:
                 - !Ref 'AWS::Partition'
                 - 'iam:'
                 - !Ref 'AWS::AccountId'
-                - role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
+                - role/AmazonSageMakerServiceCatalogProductsUseRoleFlanT5
           - Name: SAGEMAKER_PROJECT_ARN
             Value: !Join 
               - ':'
@@ -137,7 +137,7 @@ Resources:
           - !Ref 'AWS::Partition'
           - 'iam:'
           - !Ref 'AWS::AccountId'
-          - role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
+          - role/AmazonSageMakerServiceCatalogProductsUseRoleFlanT5
       ArtifactStore:
         Type: S3
         Location: !Ref MlOpsArtifactsBucket
@@ -191,7 +191,7 @@ Resources:
                     - 'iam:'
                     - !Ref 'AWS::AccountId'
                     - >-
-                      role/service-role/AmazonSageMakerServiceCatalogProductsUseRole
+                      role/AmazonSageMakerServiceCatalogProductsUseRoleFlanT5
                 StackName: !Sub >-
                   sagemaker-${SageMakerProjectName}-${SageMakerProjectId}-deploy-staging
                 TemplateConfiguration: 'BuildArtifact::staging-config-export.json'

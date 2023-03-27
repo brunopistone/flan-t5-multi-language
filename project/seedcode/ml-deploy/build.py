@@ -31,16 +31,17 @@ sagemaker_client = boto3.client("sagemaker")
 translate_client = boto3.client("translate")
 
 # helper to create the model.tar.gz
-def compress(tar_dir=None,output_file="model.tar.gz"):
+def compress(tar_dir=None, output_file="model.tar.gz"):
     parent_dir = os.getcwd()
     os.chdir(tar_dir)
     with tarfile.open(os.path.join(parent_dir, output_file), "w:gz") as tar:
         for item in os.listdir('.'):
-          print(item)
-          tar.add(item, arcname=item)
+            print(item)
+            tar.add(item, arcname=item)
     os.chdir(parent_dir)
-        
-def extend_config(args, stage_config):
+
+
+def extend_config(args, stage_config, container_def):
     """
     Extend the stage configuration with additional parameters and tags based.
     """
@@ -51,14 +52,19 @@ def extend_config(args, stage_config):
         stage_config["Tags"] = {}
     # Create new params and tags
     new_params = {
+        "ContainerImage": container_def["Image"],
+        "EndpointInstanceCount": args.inference_instance_count,
+        "EndpointInstanceType": args.inference_instance_type,
         "EndpointName": args.endpoint_name,
         "LambdaPath": s3_artifacts_path + "/lambda.zip",
+        "ModelDataUrl": container_def["ModelDataUrl"],
+        "ModelName": args.model_name,
         "ModelExecutionRoleArn": args.model_execution_role,
         "S3BucketArtifacts": args.default_bucket,
         "SageMakerProjectName": args.sagemaker_project_name,
         "SageMakerProjectId": args.sagemaker_project_id
     }
-    
+
     new_tags = {
         "sagemaker:deployment-stage": stage_config["Parameters"]["StageName"],
         "sagemaker:project-id": args.sagemaker_project_id,
@@ -72,16 +78,18 @@ def extend_config(args, stage_config):
         "Tags": {**stage_config.get("Tags", {}), **new_tags},
     }
 
+
 def get_pipeline_custom_tags(args, sagemaker_client, new_tags):
     try:
         response = sagemaker_client.list_tags(
-                ResourceArn=args.sagemaker_project_arn)
+            ResourceArn=args.sagemaker_project_arn)
         project_tags = response["Tags"]
         for project_tag in project_tags:
             new_tags[project_tag["Key"]] = project_tag["Value"]
     except:
         logger.error("Error getting project tags")
     return new_tags
+
 
 def get_cfn_style_config(stage_config):
     parameters = []
@@ -100,6 +108,7 @@ def get_cfn_style_config(stage_config):
         tags.append(tag)
     return parameters, tags
 
+
 def create_cfn_params_tags_file(config, export_params_file, export_tags_file):
     # Write Params and tags in separate file for Cfn cli command
     parameters, tags = get_cfn_style_config(config)
@@ -107,7 +116,8 @@ def create_cfn_params_tags_file(config, export_params_file, export_tags_file):
         json.dump(parameters, f, indent=4)
     with open(export_tags_file, "w") as f:
         json.dump(tags, f, indent=4)
-        
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--log-level", type=str, default=os.environ.get("LOGLEVEL", "INFO").upper())
@@ -137,7 +147,6 @@ def main():
     log_format = "%(levelname)s: [%(filename)s:%(lineno)s] %(message)s"
     logging.basicConfig(format=log_format, level=args.log_level)
 
-    # create model dir
     model_dir = Path(os.path.join(BASE_DIR, model_dir_name))
 
     if not os.path.isdir(os.path.join(BASE_DIR, model_dir_name)):
@@ -154,7 +163,8 @@ def main():
     compress(str(model_dir))
 
     model_url = sagemaker.Session().upload_data(
-        os.path.join(BASE_DIR, "model.tar.gz"), bucket=args.default_bucket, key_prefix="/".join([s3_model_path, args.model_name])
+        os.path.join(BASE_DIR, "model.tar.gz"), bucket=args.default_bucket,
+        key_prefix="/".join([s3_model_path, args.model_name])
     )
 
     logger.info("S3 model url: {}".format(model_url))
@@ -169,40 +179,9 @@ def main():
         sagemaker_session=sagemaker_session
     )
 
-    try:
-        model.deploy(
-            endpoint_name=args.endpoint_name,
-            initial_instance_count=args.inference_instance_count,
-            instance_type=args.inference_instance_type
-        )
-    except ClientError as e:
-        stacktrace = traceback.format_exc()
-        print("{}".format(stacktrace))
+    container_def = model.prepare_container_def(instance_type=args.inference_instance_type)
 
-        model = HuggingFaceModel(
-            name=args.model_name + "-" + str(round(time.time())),
-            transformers_version=args.inference_transformers_version,
-            pytorch_version=args.inference_framework_version,
-            py_version=args.inference_python_version,
-            model_data=model_url,
-            role=args.model_execution_role,
-            sagemaker_session=sagemaker_session
-        )
-
-        model.create(
-            instance_type=args.inference_instance_type
-        )
-
-        predictor = HuggingFacePredictor(
-            endpoint_name=args.endpoint_name,
-            sagemaker_session=sagemaker_session
-        )
-
-        predictor.update_endpoint(
-            initial_instance_count=args.inference_instance_count,
-            instance_type=args.inference_instance_type,
-            model_name=model.name
-        )
+    # deploy_model(args, model, model_url)
 
     with ZipFile(os.path.join(BASE_DIR, "lambda.zip"), 'w') as zip_object:
         # Adding files that need to be zipped
@@ -217,12 +196,13 @@ def main():
 
     # Write the staging config
     with open(args.import_staging_config, "r") as f:
-        staging_config = extend_config(args, json.load(f))
+        staging_config = extend_config(args, json.load(f), container_def)
     logger.debug("Staging config: {}".format(json.dumps(staging_config, indent=4)))
     with open(args.export_staging_config, "w") as f:
         json.dump(staging_config, f, indent=4)
     if (args.export_cfn_params_tags):
-      create_cfn_params_tags_file(staging_config, args.export_staging_params, args.export_staging_tags)
+        create_cfn_params_tags_file(staging_config, args.export_staging_params, args.export_staging_tags)
+
 
 if __name__ == "__main__":
     main()
