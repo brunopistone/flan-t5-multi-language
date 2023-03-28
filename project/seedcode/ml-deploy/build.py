@@ -57,7 +57,7 @@ def extend_config(args, stage_config, container_def):
         "LambdaName": args.lambda_name,
         "LambdaPath": s3_artifacts_path + "/lambda.zip",
         "ModelDataUrl": container_def["ModelDataUrl"],
-        "ModelName": args.model_name + "-" + + str(round(time.time())),
+        "ModelName": args.model_name + "-" + str(round(time.time())),
         "ModelExecutionRoleArn": args.model_execution_role,
         "S3BucketArtifacts": args.default_bucket,
         "SageMakerProjectName": args.sagemaker_project_name,

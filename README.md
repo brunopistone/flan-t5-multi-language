@@ -3,6 +3,8 @@
 The scope of this repo is to provide an end-to-end example for using HuggingFace Flan T5 XXL model on AWS by using 
 Amazon SageMaker Real-Time Endpoint, Amazon Comprehend, and Amazon Translate for managing multi-language inputs.
 
+![](./images/example.png)
+
 ## Reference Blogs
 1. [Create Your Own Large Language Model Playground in SageMaker Studio](https://towardsdatascience.com/create-your-own-large-language-model-playground-in-sagemaker-studio-1be5846c5089)
 2. [Deploy FLAN-T5 XXL on Amazon SageMaker](https://www.philschmid.de/deploy-flan-t5-sagemaker)
