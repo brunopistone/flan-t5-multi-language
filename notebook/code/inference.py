@@ -1,5 +1,4 @@
 import logging
-import torch
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 logging.basicConfig(level=logging.INFO)
