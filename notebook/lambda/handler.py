@@ -4,8 +4,11 @@ import logging
 import os
 import traceback
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+if len(logging.getLogger().handlers) > 0:
+    logging.getLogger().setLevel(logging.INFO)
+else:
+    logging.basicConfig(level=logging.INFO)
 
 comprehend_client = boto3.client("comprehend")
 sagemaker_runtime_client = boto3.client('sagemaker-runtime')
@@ -49,24 +52,41 @@ def lambda_handler(event, context):
         payload = event["payload"]
         parameters = event["parameters"]
 
-        start_lan = detect_language(payload)
-
-        if start_lan != "en":
-            payload = translate_string(payload, start_lan, "en")
-
-            logger.info("Translated sentence: {}".format(payload))
+        if len(payload) > 255:
+            n = 255
+            chunks = [payload[i:i + n] for i in range(0, len(payload), n)]
         else:
-            logger.info("Detected en language")
+            chunks = [payload]
+
+        translated_chunks = []
+        start_langs = []
+
+        for chunk in chunks:
+            start_lan = detect_language(chunk)
+            start_langs.append(start_lan)
+
+            if start_lan != "en":
+                chunk = translate_string(chunk, start_lan, "en")
+
+                logger.info("Translated sentence: {}".format(chunk))
+            else:
+                logger.info("Detected en language")
+
+            translated_chunks.append(chunk)
+
+        payload = "".join(translated_chunks)
 
         response = sagemaker_runtime_client.invoke_endpoint(
             EndpointName=endpoint_name,
             ContentType='application/json',
             Body=json.dumps({
                 "inputs": payload,
-                "parameters" :parameters
+                "parameters": parameters
             }))
 
         results = json.loads(response['Body'].read().decode())
+
+        start_lan = max(set(start_langs), key=start_langs.count)
 
         if start_lan != "en":
             results[0]["generated_text"] = translate_string(results[0]["generated_text"], "en", start_lan)
