@@ -1,4 +1,5 @@
 import logging
+import torch
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 logging.basicConfig(level=logging.INFO)
@@ -21,16 +22,21 @@ def predict_fn(data, model_and_tokenizer):
 
     logger.info("inputs: {}".format(inputs))
 
-    # preprocess
-    input_ids = tokenizer(inputs, return_tensors="pt").input_ids
+    results = []
 
-    # pass inputs with all kwargs in data
-    if parameters is not None:
-        outputs = model.generate(input_ids, **parameters)
-    else:
-        outputs = model.generate(input_ids)
+    for input in inputs:
+        # preprocess
+        input_ids = tokenizer(input, return_tensors="pt").input_ids
 
-    # postprocess the prediction
-    prediction = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        # pass inputs with all kwargs in data
+        if parameters is not None:
+            outputs = model.generate(input_ids, **parameters)
+        else:
+            outputs = model.generate(input_ids)
 
-    return [{"generated_text": prediction}]
+        # postprocess the prediction
+        prediction = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+        results.append(prediction)
+
+    return [{"generated_text": " ".join(results)}]
