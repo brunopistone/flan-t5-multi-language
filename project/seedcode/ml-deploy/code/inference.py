@@ -22,21 +22,18 @@ def predict_fn(data, model_and_tokenizer):
 
     logger.info("inputs: {}".format(inputs))
 
-    results = []
+    # preprocess
+    input_ids = tokenizer(inputs, return_tensors="pt").input_ids
 
-    for input in inputs:
-        # preprocess
-        input_ids = tokenizer(input, return_tensors="pt").input_ids
+    # pass inputs with all kwargs in data
+    if parameters is not None:
+        outputs = model.generate(input_ids, **parameters)
+    else:
+        outputs = model.generate(input_ids)
 
-        # pass inputs with all kwargs in data
-        if parameters is not None:
-            outputs = model.generate(input_ids, **parameters)
-        else:
-            outputs = model.generate(input_ids)
+    # postprocess the prediction
+    prediction = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        # postprocess the prediction
-        prediction = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    logger.info("Prediction: {}".format(prediction))
 
-        results.append(prediction)
-
-    return [{"generated_text": " ".join(results)}]
+    return [{"generated_text": prediction}]
