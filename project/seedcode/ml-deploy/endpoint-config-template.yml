@@ -1,7 +1,6 @@
 Description:
   This template is built and deployed by the infrastructure pipeline in various stages (staging/production) as required.
-  It specifies the resources that need to be created. In this case, an EventBridge Rule, a SageMaker Pipelines and a
-  SageMake Model.
+  It specifies the resources that need to be created. In this case, SageMaker Model, SageMaker Endpoint, and a Lambda function.
 Parameters:
   ContainerImage:
     Type: String

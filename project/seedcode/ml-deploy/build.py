@@ -22,11 +22,8 @@ logger = logging.getLogger(__name__)
 
 sagemaker_session = sagemaker.Session()
 
-comprehend_client = boto3.client("comprehend")
-lambda_client = boto3.client("lambda")
 s3_client = boto3.client("s3")
 sagemaker_client = boto3.client("sagemaker")
-translate_client = boto3.client("translate")
 
 # helper to create the model.tar.gz
 def compress(tar_dir=None, output_file="model.tar.gz"):
